@@ -6,9 +6,53 @@ let nameList = "";
 
 // Contadores de paginas
 let pageCount = 1;
+let itemsPerPage = 8; // Limitador de itens por página
 let start = 0;
-let end = 8;
-let totalNumPages = 0;
+let end = itemsPerPage;
+let totalNumPages = 0; // vai ser incrementado ao inicializar uma lista
+
+// Dados salvos
+let lh = localStorage.getItem("listSave");
+console.log(lh);
+
+if (lh != null) {
+  console.log("Dados salvos encontrados");
+  console.log(lh);
+  loadSavedLists();
+} else {
+  console.log("Não há dados salvos");
+}
+
+// Salva dados para uso posterior
+function saveList() {
+  if (currentListItens[0] == undefined) {
+    console.log("Não existe lista carregada");
+    return;
+  }
+
+  // Criar logica de salvamento...
+
+  const saved = {
+    name: nameList,
+  };
+
+  localStorage.setItem("listSave", JSON.stringify(saved));
+  console.log(`Lista ${nameList} salva!`);
+}
+
+// Com listas salvas, gera um menu de atalho
+function loadSavedLists() {
+  const salvedMenu = document.getElementById("list_saved_items");
+
+  salvedMenu.innerHTML = "";
+
+  saved.forEach((items) => {
+    const li = document.createElement("li");
+    li.innerText = items.name;
+
+    salvedMenu.appendChild(li);
+  });
+}
 
 // Validar campos de entrada
 function URLInput() {
@@ -18,6 +62,9 @@ function URLInput() {
     console.log("URL inválida, confira a fonte");
     return;
   }
+
+  start = 0;
+  end = itemsPerPage;
 
   btnHide.disabled = true;
 
@@ -108,11 +155,36 @@ function restoreList() {
   console.log("Lista restaurada");
 
   start = 0;
-  end = 8;
+  end = itemsPerPage;
+  pageCount = 1;
 
   createList(currentListItens);
 }
 
-function returnItemsList() {}
+// Voltar na paginação
+function returnItemsList() {
+  if (pageCount <= 1) {
+    return;
+  }
 
-function advanceItemsList() {}
+  pageCount--;
+
+  start -= itemsPerPage;
+  end -= itemsPerPage;
+
+  createList(currentListItens);
+}
+
+// Avançar na paginação
+function advanceItemsList() {
+  if (pageCount >= totalNumPages) {
+    return;
+  }
+
+  pageCount++;
+
+  start = (pageCount - 1) * itemsPerPage;
+  end = start + itemsPerPage;
+
+  createList(currentListItens);
+}

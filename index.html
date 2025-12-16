@@ -21,17 +21,33 @@
     <input type="text" name="name" id="name" />
     <button type="button" onclick="searchByName()">Procurar</button>
     <button type="button" onclick="restoreList()">Restaurar</button>
-    <p>
+    <hr />
+    <h3>Navegação</h3>
+    <p
+      style="
+        display: inline-flex;
+        letter-spacing: 1px;
+        font-weight: bold;
+        margin-right: 1rem;
+      "
+    >
       <span id="start">0</span> /
       <span id="total">0</span>
     </p>
-    <button type="button" id="btn_back">Voltar</button>
-    <button type="button" id="btn_next" onclick="advanceItemsList()">
+    <button type="button" id="btn_back" onmousemove="returnItemsList()">
+      Voltar
+    </button>
+    <button type="button" id="btn_next" onmousemove="advanceItemsList()">
       Avançar
     </button>
+    <hr />
+    <h3>Salvamento</h3>
+    <button type="button" id="btn_save" onclick="saveList()">Salvar</button>
+    <ul id="list_saved_items"></ul>
     <hr />
     <section class="container"></section>
 
     <script src="js/index.js"></script>
+    <!-- <script type="module" src="js/saves.js"></script> -->
   </body>
 </html>
