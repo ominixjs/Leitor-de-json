@@ -15,7 +15,7 @@
       id="text"
       value="https://hydralinks.pages.dev/sources/fitgirl.json"
     />
-    <button type="button" id="btn_hide" onclick="URLInput()">Salvar</button>
+    <button type="button" id="btn_hide" onclick="URLInput()">Carregar</button>
     <hr />
     <h2>Busque pelo nome</h2>
     <input type="text" name="name" id="name" />
@@ -41,10 +41,16 @@
       Avançar
     </button>
     <hr />
-    <h3>Salvamento</h3>
+    <h3>Controle de salvamento</h3>
     <button type="button" id="btn_save" onclick="saveList()">Salvar</button>
+    <button type="button" id="btn_delete_all" onclick="deleteAllSavedLists()">
+      Apagar tudo
+    </button>
+
     <ul id="list_saved_items"></ul>
     <hr />
+
+    <h3 id="nameList"></h3>
     <section class="container"></section>
 
     <script src="js/index.js"></script>
