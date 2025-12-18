@@ -13,6 +13,7 @@ const btnDeleteAll = document.getElementById("btn_delete_all");
 
 // Dados da lista atual
 export let currentListItens = [];
+let searchResult = undefined;
 export let nameList = "";
 
 // Contadores de paginas
@@ -122,7 +123,7 @@ function searchByName() {
 
   const inputName = document.getElementById("name").value;
 
-  const searchResult = currentListItens.filter((item) => {
+  searchResult = currentListItens.filter((item) => {
     return item.title.toLowerCase().includes(inputName.toLowerCase());
   });
 
@@ -143,7 +144,8 @@ function restoreList() {
     return;
   }
 
-  console.log("Lista restaurada");
+  // Remove lista criada pela pesquisa para evitar que quebre a paginação
+  searchResult = undefined;
 
   resetCount();
 
@@ -151,6 +153,8 @@ function restoreList() {
   totalNumPages = Math.ceil(currentListItens.length / itemsPerPage);
 
   createList(currentListItens);
+
+  console.log("Lista restaurada");
 }
 
 btnBack.addEventListener("mousemove", returnItemsList);
@@ -166,10 +170,11 @@ function returnItemsList() {
   start -= itemsPerPage;
   end -= itemsPerPage;
 
-  createList(currentListItens);
+  const activeList = searchResult || currentListItens;
+  createList(activeList);
 }
 
-btnNext.addEventListener("mousemove", advanceItemsList);
+btnNext.addEventListener("click", advanceItemsList);
 
 // Avançar na paginação
 function advanceItemsList() {
@@ -182,7 +187,9 @@ function advanceItemsList() {
   start = (pageCount - 1) * itemsPerPage;
   end = start + itemsPerPage;
 
-  createList(currentListItens);
+  const activeList = searchResult || currentListItens;
+
+  createList(activeList);
 }
 
 // =======================================================================================
