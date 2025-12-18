@@ -9,18 +9,13 @@
   </head>
   <body>
     <h1>Insira URL</h1>
-    <input
-      type="text"
-      name="text"
-      id="text"
-      value="https://hydralinks.pages.dev/sources/fitgirl.json"
-    />
-    <button type="button" id="btn_hide" onclick="URLInput()">Carregar</button>
+    <input type="text" name="text" id="text" placeholder="Sua URL aqui" />
+    <button type="button" id="btn_hide">Carregar</button>
     <hr />
     <h2>Busque pelo nome</h2>
-    <input type="text" name="name" id="name" />
-    <button type="button" onclick="searchByName()">Procurar</button>
-    <button type="button" onclick="restoreList()">Restaurar</button>
+    <input type="text" name="name" id="name" placeholder="Busque aqui" />
+    <button type="button" id="btn_search">Procurar</button>
+    <button type="button" id="btn_refrash">Restaurar</button>
     <hr />
     <h3>Navegação</h3>
     <p
@@ -34,18 +29,12 @@
       <span id="start">0</span> /
       <span id="total">0</span>
     </p>
-    <button type="button" id="btn_back" onmousemove="returnItemsList()">
-      Voltar
-    </button>
-    <button type="button" id="btn_next" onmousemove="advanceItemsList()">
-      Avançar
-    </button>
+    <button type="button" id="btn_back">Voltar</button>
+    <button type="button" id="btn_next">Avançar</button>
     <hr />
     <h3>Controle de salvamento</h3>
-    <button type="button" id="btn_save" onclick="saveList()">Salvar</button>
-    <button type="button" id="btn_delete_all" onclick="deleteAllSavedLists()">
-      Apagar tudo
-    </button>
+    <button type="button" id="btn_save">Salvar</button>
+    <button type="button" id="btn_delete_all">Apagar tudo</button>
 
     <ul id="list_saved_items"></ul>
     <hr />
@@ -53,7 +42,6 @@
     <h3 id="nameList"></h3>
     <section class="container"></section>
 
-    <script src="js/index.js"></script>
-    <!-- <script type="module" src="js/saves.js"></script> -->
+    <script type="module" src="js/index.js"></script>
   </body>
 </html>

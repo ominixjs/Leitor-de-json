@@ -1,8 +1,19 @@
+import { saveList, deleteAllSavedLists } from "./localstorage.js";
+
+// ================================================================================
+
+// Acionadores de eventos
 const btnHide = document.getElementById("btn_hide");
+const btnSearch = document.getElementById("btn_search");
+const btnRefrash = document.getElementById("btn_refrash");
+const btnBack = document.getElementById("btn_back");
+const btnNext = document.getElementById("btn_next");
+const btnSave = document.getElementById("btn_save");
+const btnDeleteAll = document.getElementById("btn_delete_all");
 
 // Dados da lista atual
-let currentListItens = [];
-let nameList = "";
+export let currentListItens = [];
+export let nameList = "";
 
 // Contadores de paginas
 let pageCount = 1;
@@ -11,116 +22,16 @@ let start = 0;
 let end = itemsPerPage;
 let totalNumPages = 0; // vai ser incrementado ao inicializar uma lista
 
-// ===========================================================================================================
+// ===============================================================================
 
-// Verificar dados salvos
-let lh = localStorage.getItem("listSave");
+btnHide.addEventListener("click", URLInput);
 
-if (lh != null) {
-  console.log("Dados salvos encontrados");
-  loadSavedLists();
-} else {
-  console.log("Não há dados salvos");
+// Reinicia todos os valores de paginação
+function resetCount() {
+  start = 0;
+  end = itemsPerPage;
+  pageCount = 1;
 }
-
-// Salva dados para uso posterior
-function saveList() {
-  if (currentListItens[0] === undefined) {
-    console.log("Não existe lista disponivel");
-    return;
-  }
-
-  const url = document.getElementById("text").value;
-
-  if (url === "" || !url.includes(".json")) {
-    console.log("Campo de URL vázia");
-    return;
-  }
-
-  const saved = {
-    nameList,
-    url,
-  };
-
-  if (lh == null) {
-    let createFirstArray = [];
-
-    createFirstArray.push(saved);
-
-    localStorage.setItem("listSave", JSON.stringify(createFirstArray));
-
-    console.log("Primeiro salvamento no banco de dados");
-  } else {
-    let dataSave = JSON.parse(lh);
-
-    dataSave.push(saved);
-
-    dataSave = JSON.stringify(dataSave);
-
-    localStorage.setItem("listSave", dataSave);
-
-    console.log("Mais uma lista salva!");
-  }
-
-  loadSavedLists();
-  console.log(`Lista ${nameList} salva!`);
-}
-
-// Com listas salvas, gera uma lista de atalho
-function loadSavedLists() {
-  console.log("Carregando lista salvas...");
-
-  const listSalvedMenu = document.getElementById("list_saved_items");
-
-  lh = localStorage.getItem("listSave");
-
-  if (lh == null) {
-    listSalvedMenu.innerHTML = "";
-    console.log("Lista de dados salvos está vázia!");
-    return;
-  }
-
-  listSalvedMenu.innerHTML = "";
-
-  const listSaves = JSON.parse(lh);
-
-  listSaves.forEach((item, index) => {
-    const li = document.createElement("li");
-    li.innerText = item.nameList;
-
-    const btnDeleteItem = document.createElement("button");
-    btnDeleteItem.innerText = "Deletar";
-
-    btnDeleteItem.addEventListener("click", () => {
-      listSaves.splice(index, 1);
-      localStorage.setItem("listSave", JSON.stringify(listSaves));
-      loadSavedLists();
-    });
-
-    listSalvedMenu.appendChild(li);
-    li.appendChild(btnDeleteItem);
-  });
-}
-
-// Apagar todas as listas salvas
-function deleteAllSavedLists() {
-  lh = localStorage.getItem("listSave");
-
-  if (lh == null) {
-    console.log("Impossivel continuar, dados já foram apagados!");
-    return;
-  }
-
-  localStorage.clear("listSave");
-
-  loadSavedLists();
-
-  console.log("Toda lista salva deletada");
-}
-
-// Procedimento de carregar listas salvas
-
-// =======================================================================================
 
 // Validar campos de entrada
 function URLInput() {
@@ -134,14 +45,15 @@ function URLInput() {
   start = 0;
   end = itemsPerPage;
 
-  btnHide.disabled = true;
-
   loadList(url);
 }
 
 // Validar e converter json
-async function loadList(url) {
+export async function loadList(url) {
   try {
+    btnHide.disabled = true;
+    resetCount();
+
     console.log("Iniciando carregamento");
 
     const response = await fetch(url);
@@ -197,6 +109,8 @@ function createList(list) {
   });
 }
 
+btnSearch.addEventListener("click", searchByName);
+
 // Busca pelo nome do item
 function searchByName() {
   if (currentListItens[0] === undefined) {
@@ -212,8 +126,15 @@ function searchByName() {
     return item.title.toLowerCase().includes(inputName.toLowerCase());
   });
 
+  resetCount();
+
+  // Calcula um novo total de pagina
+  totalNumPages = Math.ceil(searchResult.length / itemsPerPage);
+
   createList(searchResult);
 }
+
+btnRefrash.addEventListener("click", restoreList);
 
 // Restaura lista
 function restoreList() {
@@ -224,12 +145,15 @@ function restoreList() {
 
   console.log("Lista restaurada");
 
-  start = 0;
-  end = itemsPerPage;
-  pageCount = 1;
+  resetCount();
+
+  // Calcula um novo total de pagina
+  totalNumPages = Math.ceil(currentListItens.length / itemsPerPage);
 
   createList(currentListItens);
 }
+
+btnBack.addEventListener("mousemove", returnItemsList);
 
 // Voltar na paginação
 function returnItemsList() {
@@ -245,6 +169,8 @@ function returnItemsList() {
   createList(currentListItens);
 }
 
+btnNext.addEventListener("mousemove", advanceItemsList);
+
 // Avançar na paginação
 function advanceItemsList() {
   if (pageCount >= totalNumPages) {
@@ -258,3 +184,13 @@ function advanceItemsList() {
 
   createList(currentListItens);
 }
+
+// =======================================================================================
+
+// Localstorage
+btnSave.addEventListener("click", saveList);
+btnDeleteAll.addEventListener("click", deleteAllSavedLists);
+
+// Precisa fazer!
+
+// =======================================================================================
