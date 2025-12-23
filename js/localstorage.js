@@ -38,6 +38,29 @@ function loadSavedLists() {
     const li = document.createElement("li");
     li.innerText = `${item.nameList}`;
 
+    // Validar URL
+    fetch(item.url)
+      .then((response) => {
+        if (!response.ok) {
+          li.style.color = "red";
+          return;
+        }
+
+        response
+          .json()
+          .then((list) => {
+            li.style.color = "green";
+          })
+          .catch((err) => {
+            li.style.color = "red";
+            console.log(`Erro ao carregar ${item.nameList}`);
+          });
+      })
+      .catch((erro) => {
+        li.style.color = "red";
+        console.log(`Erro ao carregar ${item.nameList}`);
+      });
+
     const btnDeleteItem = document.createElement("button");
     btnDeleteItem.innerText = "Deletar";
 
@@ -78,12 +101,22 @@ function saveList() {
     return;
   }
 
-  let lh = localStorage.getItem("listSave");
-
   const url = document.getElementById("text").value;
 
   if (url === "" || !url.includes(".json")) {
     console.log("Campo de URL vázia");
+    return;
+  }
+
+  let lh = localStorage.getItem("listSave");
+
+  // Verifica se ja possui a lista salva
+  let listSave = JSON.parse(lh);
+
+  let repeatURL = listSave.filter((item) => item.url.includes(url));
+
+  if (repeatURL.length > 0) {
+    console.log("Esta lista já é existente");
     return;
   }
 

@@ -13,6 +13,8 @@ import {
 - Definir para cada item nova proprieda de autor 
   com o nome da lista;
 - Ajustar listas de salvos para evitar repetições.
+- script de colar texto direto para o campo de entrada 
+- Validar url de itens da lista salva
 */
 
 // Dados da lista atual
