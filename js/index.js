@@ -1,52 +1,29 @@
-import { saveList, deleteAllSavedLists } from "./localstorage.js";
+import "./localstorage.js";
+import {
+  start,
+  end,
+  pageCount,
+  itemsPerPage,
+  resetCount,
+  btnHide,
+} from "./events.js";
 
-// ================================================================================
-
-// Acionadores de eventos
-const btnHide = document.getElementById("btn_hide");
-const btnSearch = document.getElementById("btn_search");
-const btnRefrash = document.getElementById("btn_refrash");
-const btnBack = document.getElementById("btn_back");
-const btnNext = document.getElementById("btn_next");
-const btnSave = document.getElementById("btn_save");
-const btnDeleteAll = document.getElementById("btn_delete_all");
+/* Precisa ser feito:
+- Unificar listas salvas;
+- Definir para cada item nova proprieda de autor 
+  com o nome da lista;
+- Ajustar listas de salvos para evitar repetições.
+*/
 
 // Dados da lista atual
 export let currentListItens = [];
-let searchResult = undefined;
 export let nameList = "";
 
-// Contadores de paginas
-let pageCount = 1;
-let itemsPerPage = 8; // Limitador de itens por página
-let start = 0;
-let end = itemsPerPage;
-let totalNumPages = 0; // vai ser incrementado ao inicializar uma lista
+export let totalNumPages = 0; // vai ser incrementado ao inicializar uma lista
 
-// ===============================================================================
-
-btnHide.addEventListener("click", URLInput);
-
-// Reinicia todos os valores de paginação
-function resetCount() {
-  start = 0;
-  end = itemsPerPage;
-  pageCount = 1;
-}
-
-// Validar campos de entrada
-function URLInput() {
-  const url = document.getElementById("text").value;
-
-  if (url === "" || !url.includes(".json")) {
-    console.log("URL inválida, confira a fonte");
-    return;
-  }
-
-  start = 0;
-  end = itemsPerPage;
-
-  loadList(url);
+export function resetTotalNumPages(list) {
+  console.log("Total de itens da lista foi renovada");
+  totalNumPages = Math.ceil(list.length / itemsPerPage);
 }
 
 // Validar e converter json
@@ -67,7 +44,7 @@ export async function loadList(url) {
 
     currentListItens = list.downloads;
     nameList = list.name;
-    totalNumPages = Math.ceil(list.downloads.length / 8);
+    resetTotalNumPages(list.downloads);
 
     console.log("Processo de carregamento concluido");
     createList(currentListItens);
@@ -79,10 +56,9 @@ export async function loadList(url) {
 }
 
 // Criar lista
-function createList(list) {
+export function createList(list) {
   const container = document.querySelector(".container");
   const txtStart = document.getElementById("start");
-  const txtEnd = document.getElementById("end");
   const txtTotal = document.getElementById("total");
   const nameJson = document.getElementById("nameList");
 
@@ -109,95 +85,3 @@ function createList(list) {
     container.appendChild(div);
   });
 }
-
-btnSearch.addEventListener("click", searchByName);
-
-// Busca pelo nome do item
-function searchByName() {
-  if (currentListItens[0] === undefined) {
-    console.log("Não existe lista disponivel");
-    return;
-  }
-
-  console.log("Busca iniciada");
-
-  const inputName = document.getElementById("name").value;
-
-  searchResult = currentListItens.filter((item) => {
-    return item.title.toLowerCase().includes(inputName.toLowerCase());
-  });
-
-  resetCount();
-
-  // Calcula um novo total de pagina
-  totalNumPages = Math.ceil(searchResult.length / itemsPerPage);
-
-  createList(searchResult);
-}
-
-btnRefrash.addEventListener("click", restoreList);
-
-// Restaura lista
-function restoreList() {
-  if (currentListItens[0] === undefined) {
-    console.log("Não existe lista disponivel");
-    return;
-  }
-
-  // Remove lista criada pela pesquisa para evitar que quebre a paginação
-  searchResult = undefined;
-
-  resetCount();
-
-  // Calcula um novo total de pagina
-  totalNumPages = Math.ceil(currentListItens.length / itemsPerPage);
-
-  createList(currentListItens);
-
-  console.log("Lista restaurada");
-}
-
-btnBack.addEventListener("mousemove", returnItemsList);
-
-// Voltar na paginação
-function returnItemsList() {
-  if (pageCount <= 1) {
-    return;
-  }
-
-  pageCount--;
-
-  start -= itemsPerPage;
-  end -= itemsPerPage;
-
-  const activeList = searchResult || currentListItens;
-  createList(activeList);
-}
-
-btnNext.addEventListener("click", advanceItemsList);
-
-// Avançar na paginação
-function advanceItemsList() {
-  if (pageCount >= totalNumPages) {
-    return;
-  }
-
-  pageCount++;
-
-  start = (pageCount - 1) * itemsPerPage;
-  end = start + itemsPerPage;
-
-  const activeList = searchResult || currentListItens;
-
-  createList(activeList);
-}
-
-// =======================================================================================
-
-// Localstorage
-btnSave.addEventListener("click", saveList);
-btnDeleteAll.addEventListener("click", deleteAllSavedLists);
-
-// Precisa fazer!
-
-// =======================================================================================

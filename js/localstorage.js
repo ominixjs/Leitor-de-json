@@ -1,23 +1,84 @@
-// Necesario pegar nome e lista carregada para validar existência
-// que deu tudo certo
 import { currentListItens, nameList, loadList } from "./index.js";
 
-// Verificar dados salvos
-let lh = localStorage.getItem("listSave");
+// Acionadores de eventos
+const btnSave = document.getElementById("btn_save");
+const btnDeleteAll = document.getElementById("btn_delete_all");
 
-if (lh != null) {
-  console.log("Dados salvos encontrados");
-  loadSavedLists();
-} else {
-  console.log("Não há dados salvos");
+verifySavedData();
+
+function verifySavedData() {
+  // Verificar dados salvos
+  let lh = localStorage.getItem("listSave");
+
+  if (lh != null) {
+    console.log("Dados salvos encontrados");
+    loadSavedLists();
+  } else {
+    console.log("Não há dados salvos");
+  }
+}
+
+// Localstorage events
+btnSave.addEventListener("click", saveList);
+btnDeleteAll.addEventListener("click", deleteAllSavedLists);
+
+// Com listas salvas, gera uma lista de atalho
+function loadSavedLists() {
+  console.log("Carregando lista salva...");
+
+  const listSalvedMenu = document.getElementById("list_saved_items");
+
+  let lh = localStorage.getItem("listSave");
+
+  listSalvedMenu.innerHTML = "";
+
+  let listSaves = JSON.parse(lh);
+
+  listSaves.forEach((item, index) => {
+    const li = document.createElement("li");
+    li.innerText = `${item.nameList}`;
+
+    const btnDeleteItem = document.createElement("button");
+    btnDeleteItem.innerText = "Deletar";
+
+    btnDeleteItem.addEventListener("click", () => {
+      listSaves.splice(index, 1);
+
+      // Caso não tenha mais itens, deixo nulo como padrão
+      if (listSaves[0] == undefined) {
+        localStorage.clear("listSave");
+        listSalvedMenu.innerHTML = "";
+      } else {
+        localStorage.setItem("listSave", JSON.stringify(listSaves));
+      }
+
+      verifySavedData();
+    });
+
+    const btnLoadList = document.createElement("button");
+    btnLoadList.innerText = "Carregar";
+
+    btnLoadList.addEventListener("click", () => {
+      const selectItemFromList = JSON.parse(lh);
+      const separateURLfromlist = selectItemFromList[index].url;
+
+      loadList(separateURLfromlist);
+    });
+
+    listSalvedMenu.appendChild(li);
+    li.appendChild(btnLoadList);
+    li.appendChild(btnDeleteItem);
+  });
 }
 
 // Salva dados para uso posterior
-export function saveList() {
+function saveList() {
   if (currentListItens[0] === undefined) {
     console.log("Não existe lista disponivel");
     return;
   }
+
+  let lh = localStorage.getItem("listSave");
 
   const url = document.getElementById("text").value;
 
@@ -55,65 +116,20 @@ export function saveList() {
   console.log(`Lista ${nameList} salva!`);
 }
 
-// Com listas salvas, gera uma lista de atalho
-export function loadSavedLists() {
-  console.log("Carregando lista salva...");
-
+// Apagar todas as listas salvas
+function deleteAllSavedLists() {
   const listSalvedMenu = document.getElementById("list_saved_items");
 
-  lh = localStorage.getItem("listSave");
+  let lh = localStorage.getItem("listSave");
 
   if (lh == null) {
-    listSalvedMenu.innerHTML = "";
-    console.log("Lista de dados salvos está vázia!");
-    return;
-  }
-
-  listSalvedMenu.innerHTML = "";
-
-  const listSaves = JSON.parse(lh);
-
-  listSaves.forEach((item, index) => {
-    const li = document.createElement("li");
-    li.innerText = item.nameList;
-
-    const btnDeleteItem = document.createElement("button");
-    btnDeleteItem.innerText = "Deletar";
-
-    btnDeleteItem.addEventListener("click", () => {
-      listSaves.splice(index, 1);
-      localStorage.setItem("listSave", JSON.stringify(listSaves));
-      loadSavedLists();
-    });
-
-    const btnLoadList = document.createElement("button");
-    btnLoadList.innerText = "Carregar";
-
-    btnLoadList.addEventListener("click", () => {
-      const selectItemFromList = JSON.parse(lh);
-      const separateURLfromlist = selectItemFromList[index].url;
-
-      loadList(separateURLfromlist);
-    });
-
-    listSalvedMenu.appendChild(li);
-    li.appendChild(btnLoadList);
-    li.appendChild(btnDeleteItem);
-  });
-}
-
-// Apagar todas as listas salvas
-export function deleteAllSavedLists() {
-  lh = localStorage.getItem("listSave");
-
-  if (lh == null) {
-    console.log("Impossivel continuar, dados já foram apagados!");
+    console.log("Não existe dados salvos!");
     return;
   }
 
   localStorage.clear("listSave");
 
-  loadSavedLists();
+  listSalvedMenu.innerHTML = "";
 
   console.log("Toda lista salva deletada");
 }
