@@ -1,8 +1,16 @@
-import { currentListItens, nameList, loadList } from "./index.js";
+import {
+  currentListItens,
+  nameList,
+  loadList,
+  createList,
+} from "./loadJSON.js";
 
 // Acionadores de eventos
 const btnSave = document.getElementById("btn_save");
 const btnDeleteAll = document.getElementById("btn_delete_all");
+const enableLoadAllOnStartup = document.getElementById(
+  "load_everything_on_startup"
+);
 
 verifySavedData();
 
@@ -13,14 +21,66 @@ function verifySavedData() {
   if (lh != null) {
     console.log("Dados salvos encontrados");
     loadSavedLists();
+    checkAutomaticCharging();
   } else {
     console.log("Não há dados salvos");
   }
 }
 
-// Localstorage events
-btnSave.addEventListener("click", saveList);
-btnDeleteAll.addEventListener("click", deleteAllSavedLists);
+// Habilita e Desabilita carregamento automatico
+enableLoadAllOnStartup.addEventListener("change", () => {
+  let checkStatus = enableLoadAllOnStartup.checked;
+
+  localStorage.setItem("loadAuto", JSON.stringify(checkStatus));
+
+  console.log(`Carregamento automatico marcado como: ${checkStatus}`);
+});
+
+// Verifica o status e carrega as listas
+function checkAutomaticCharging() {
+  let ls = localStorage.getItem("loadAuto");
+
+  let loadAuto = JSON.parse(ls);
+
+  enableLoadAllOnStartup.checked = loadAuto;
+
+  if (loadAuto) {
+    loadAllLists();
+  }
+}
+
+// Carrega todas as URLs salvas
+function loadAllLists() {
+  const ls = localStorage.getItem("listSave");
+  const listSave = JSON.parse(ls);
+
+  listSave.forEach((item) => {
+    // loadSaveList(item.url);
+    console.log(item.url);
+  });
+}
+
+// async function loadSaveList(url) {
+//   try {
+//     const response = await fetch(url);
+
+//     if (!response.ok) {
+//       throw new Error("Erro ao dar continuidade na lista aalva");
+//     }
+
+//     const list = await response.json();
+
+//     createList(list.downloads);
+//   } catch (err) {}
+// }
+
+// Habilita e desabilita buttoes do menu
+function buttonsDisabled() {
+  const btnsDisabled = document.querySelectorAll("#btn_disabled");
+  btnsDisabled.forEach((btn) => {
+    btn.disabled ? (btn.disabled = false) : (btn.disabled = true);
+  });
+}
 
 // Com listas salvas, gera uma lista de atalho
 function loadSavedLists() {
@@ -79,13 +139,18 @@ function loadSavedLists() {
     });
 
     const btnLoadList = document.createElement("button");
+    btnLoadList.setAttribute("id", "btn_disabled");
     btnLoadList.innerText = "Carregar";
 
-    btnLoadList.addEventListener("click", () => {
+    btnLoadList.addEventListener("click", async function () {
       const selectItemFromList = JSON.parse(lh);
       const separateURLfromlist = selectItemFromList[index].url;
 
-      loadList(separateURLfromlist);
+      buttonsDisabled();
+
+      await loadList(separateURLfromlist);
+
+      buttonsDisabled();
     });
 
     listSalvedMenu.appendChild(li);
@@ -93,6 +158,8 @@ function loadSavedLists() {
     li.appendChild(btnDeleteItem);
   });
 }
+
+btnSave.addEventListener("click", saveList);
 
 // Salva dados para uso posterior
 function saveList() {
@@ -110,14 +177,16 @@ function saveList() {
 
   let lh = localStorage.getItem("listSave");
 
-  // Verifica se ja possui a lista salva
-  let listSave = JSON.parse(lh);
+  if (lh != null) {
+    // Verifica se ja possui a lista salva
+    let listSave = JSON.parse(lh);
 
-  let repeatURL = listSave.filter((item) => item.url.includes(url));
+    let repeatURL = listSave.filter((item) => item.url.includes(url));
 
-  if (repeatURL.length > 0) {
-    console.log("Esta lista já é existente");
-    return;
+    if (repeatURL.length > 0) {
+      console.log("Esta lista já é existente");
+      return;
+    }
   }
 
   const saved = {
@@ -149,6 +218,8 @@ function saveList() {
   console.log(`Lista ${nameList} salva!`);
 }
 
+btnDeleteAll.addEventListener("click", deleteAllSavedLists);
+
 // Apagar todas as listas salvas
 function deleteAllSavedLists() {
   const listSalvedMenu = document.getElementById("list_saved_items");
@@ -166,3 +237,5 @@ function deleteAllSavedLists() {
 
   console.log("Toda lista salva deletada");
 }
+
+async function loadAutoListSave() {}

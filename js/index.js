@@ -1,89 +1,144 @@
-import "./localstorage.js";
 import {
-  start,
-  end,
-  pageCount,
-  itemsPerPage,
-  resetCount,
-  btnHide,
-} from "./events.js";
+  loadList,
+  createList,
+  currentListItens,
+  totalNumPages,
+  resetTotalNumPages,
+} from "./loadJSON.js";
 
-/* Precisa ser feito:
-- Unificar listas salvas;
-- Definir para cada item nova proprieda de autor 
-  com o nome da lista;
-- Ajustar listas de salvos para evitar repetições.
-- script de colar texto direto para o campo de entrada 
-- Validar url de itens da lista salva
-*/
+// Acionadores de eventos
+export const btnHide = document.getElementById("btn_hide");
+const btnSearch = document.getElementById("btn_search");
+const btnRefrash = document.getElementById("btn_refrash");
+const btnBack = document.getElementById("btn_back");
+const btnNext = document.getElementById("btn_next");
+const btnPasteText = document.getElementById("paste_text");
 
-// Dados da lista atual
-export let currentListItens = [];
-export let nameList = "";
+let searchResult = undefined;
 
-export let totalNumPages = 0; // vai ser incrementado ao inicializar uma lista
+// Contadores de paginas
+export let pageCount = 1;
+export let itemsPerPage = 8; // Limitador de itens por página
+export let start = 0;
+export let end = itemsPerPage;
 
-export function resetTotalNumPages(list) {
-  console.log("Total de itens da lista foi renovada");
-  totalNumPages = Math.ceil(list.length / itemsPerPage);
+// Reinicia todos os valores de paginação
+export function resetCount() {
+  start = 0;
+  end = itemsPerPage;
+  pageCount = 1;
 }
 
-// Validar e converter json
-export async function loadList(url) {
-  try {
-    btnHide.disabled = true;
-    resetCount();
+btnHide.addEventListener("click", URLInput);
 
-    console.log("Iniciando carregamento");
+// Validar campos de entrada
+function URLInput() {
+  const url = document.getElementById("text").value;
 
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error("Erro ao dar continuidade");
-    }
-
-    const list = await response.json();
-
-    currentListItens = list.downloads;
-    nameList = list.name;
-    resetTotalNumPages(list.downloads);
-
-    console.log("Processo de carregamento concluido");
-    createList(currentListItens);
-  } catch (error) {
-    console.log("Error ao validar URL", error);
-  } finally {
-    btnHide.disabled = false;
+  if (url === "" || !url.includes(".json")) {
+    console.log("URL inválida, confira a fonte");
+    return;
   }
+
+  start = 0;
+  end = itemsPerPage;
+
+  loadList(url);
 }
 
-// Criar lista
-export function createList(list) {
-  const container = document.querySelector(".container");
-  const txtStart = document.getElementById("start");
-  const txtTotal = document.getElementById("total");
-  const nameJson = document.getElementById("nameList");
+btnSearch.addEventListener("click", searchByName);
 
-  nameJson.innerText = nameList;
-  txtStart.innerText = pageCount;
-  txtTotal.innerText = totalNumPages;
+// Busca pelo nome do item
+function searchByName() {
+  if (currentListItens[0] === undefined) {
+    console.log("Não existe lista disponivel");
+    return;
+  }
 
-  container.innerHTML = "";
+  console.log("Busca iniciada");
 
-  const reduceList = list.slice(start, end);
+  const inputName = document.getElementById("name").value;
 
-  reduceList.forEach((item, index) => {
-    const div = document.createElement("div");
-
-    const h3 = document.createElement("h3");
-    h3.innerHTML = ++index + item.title;
-
-    const a = document.createElement("a");
-    a.innerHTML = "link";
-    a.href = item.uris[0];
-
-    div.appendChild(h3);
-    div.appendChild(a);
-    container.appendChild(div);
+  searchResult = currentListItens.filter((item) => {
+    return item.title.toLowerCase().includes(inputName.toLowerCase());
   });
+
+  resetCount();
+
+  // Calcula um novo total de pagina
+  resetTotalNumPages(searchResult);
+
+  createList(searchResult);
+}
+
+btnRefrash.addEventListener("click", restoreList);
+
+// Restaura lista
+function restoreList() {
+  if (currentListItens[0] === undefined) {
+    console.log("Não existe lista disponivel");
+    return;
+  }
+
+  // Remove lista criada pela pesquisa para evitar que quebre a paginação
+  searchResult = undefined;
+
+  resetCount();
+
+  // Calcula um novo total de pagina
+  resetTotalNumPages(currentListItens);
+
+  createList(currentListItens);
+
+  console.log("Lista restaurada");
+}
+
+btnBack.addEventListener("mousemove", returnItemsList);
+
+// Voltar na paginação
+function returnItemsList() {
+  if (pageCount <= 1) {
+    return;
+  }
+
+  pageCount--;
+
+  start -= itemsPerPage;
+  end -= itemsPerPage;
+
+  const activeList = searchResult || currentListItens;
+  createList(activeList);
+}
+
+btnNext.addEventListener("mousemove", advanceItemsList);
+
+// Avançar na paginação
+function advanceItemsList() {
+  if (pageCount >= totalNumPages) {
+    return;
+  }
+
+  pageCount++;
+
+  start = (pageCount - 1) * itemsPerPage;
+  end = start + itemsPerPage;
+
+  const activeList = searchResult || currentListItens;
+
+  createList(activeList);
+}
+
+btnPasteText.addEventListener("click", pasteText);
+
+async function pasteText() {
+  const url = document.getElementById("text");
+  try {
+    const textCopied = await navigator.clipboard.readText();
+
+    url.value = textCopied;
+
+    console.log("Texto colado!");
+  } catch (err) {
+    console.log("Erro, não foi possivel colar texto!");
+  }
 }
