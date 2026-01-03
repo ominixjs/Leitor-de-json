@@ -1,3 +1,4 @@
+import savelist from "./localstorage.js";
 import {
   loadList,
   createList,
@@ -14,6 +15,7 @@ const btnBack = document.getElementById("btn_back");
 const btnNext = document.getElementById("btn_next");
 const btnPasteText = document.getElementById("paste_text");
 
+// Define como UNDEFINED até ser usada ou pare de ser usada
 let searchResult = undefined;
 
 // Contadores de paginas
@@ -29,10 +31,27 @@ export function resetCount() {
   pageCount = 1;
 }
 
-btnHide.addEventListener("click", URLInput);
+autoLoad();
+
+function autoLoad() {
+  let ls = localStorage.getItem("listSave");
+  ls = JSON.parse(ls);
+
+  if (ls == null) {
+    console.log("Você não possui listas salvas");
+    return;
+  }
+  
+
+  ls.forEach((elem) => {
+    loadList(elem.url);
+  });
+}
+
+btnHide.addEventListener("click", addURL);
 
 // Validar campos de entrada
-function URLInput() {
+async function addURL() {
   const url = document.getElementById("text").value;
 
   if (url === "" || !url.includes(".json")) {
@@ -43,7 +62,8 @@ function URLInput() {
   start = 0;
   end = itemsPerPage;
 
-  loadList(url);
+  await loadList(url);
+  savelist();
 }
 
 btnSearch.addEventListener("click", searchByName);
@@ -130,6 +150,7 @@ function advanceItemsList() {
 
 btnPasteText.addEventListener("click", pasteText);
 
+// Cola texto copiado no campo de URL
 async function pasteText() {
   const url = document.getElementById("text");
   try {

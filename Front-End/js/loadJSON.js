@@ -1,19 +1,7 @@
-import "./localstorage.js";
-import {
-  start,
-  end,
-  pageCount,
-  itemsPerPage,
-  resetCount,
-  btnHide,
-} from "./index.js";
+import { start, end, pageCount, itemsPerPage, resetCount } from "./index.js";
 
 /* Precisa ser feito:
-- Unificar listas salvas;
-- Definir para cada item nova proprieda de autor 
-  com o nome da lista;
-- script de colar texto direto para o campo de entrada 
-- Validar url de itens da lista salva
+- Unificar listas salvas; 
 - Verificar internet
 */
 
@@ -31,7 +19,6 @@ export function resetTotalNumPages(list) {
 // Validar e converter json
 export async function loadList(url) {
   try {
-    btnHide.disabled = true;
     resetCount();
 
     console.log("Iniciando carregamento");
@@ -44,26 +31,27 @@ export async function loadList(url) {
 
     const list = await response.json();
 
-    currentListItens = list.downloads;
+    currentListItens.push(...list.downloads);
+    console.log(list.name);
+
     nameList = list.name;
-    resetTotalNumPages(list.downloads);
+
+    resetTotalNumPages(currentListItens);
+
+    createList(currentListItens);
 
     console.log("Processo de carregamento concluido");
-    createList(currentListItens);
   } catch (err) {
     console.log("Error ao validar URL", err);
-  } finally {
-    btnHide.disabled = false;
   }
 }
 
 // Criar lista
-export function createList(list) {
+export function createList(list, name) {
   const container = document.querySelector(".container");
   const txtStart = document.getElementById("start");
   const txtTotal = document.getElementById("total");
 
-  // nameJson.innerText = nameList;
   txtStart.innerText = pageCount;
   txtTotal.innerText = totalNumPages;
 
@@ -78,7 +66,7 @@ export function createList(list) {
     h3.innerHTML = ++index + item.title;
 
     const h4 = document.createElement("h4");
-    h4.innerHTML = nameList;
+    h4.innerHTML = name;
 
     const dateItem = document.createElement("p");
     dateItem.innerHTML = item.uploadDate

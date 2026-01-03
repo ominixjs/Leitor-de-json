@@ -9,8 +9,8 @@
   </head>
   <body>
     <h1>Insira URL</h1>
-    <input type="text" name="text" id="text" placeholder="Sua URL aqui" />
-    <button type="button" id="btn_hide">Carregar</button>
+    <input type="text" name="text" id="url_input" placeholder="Sua URL aqui" />
+    <button type="button" id="btn_add">Adicionar</button>
     <button type="button" id="paste_text">Colar</button>
     <hr />
     <h2>Busque pelo nome</h2>
@@ -34,24 +34,14 @@
     <button type="button" id="btn_next">Avançar</button>
     <hr />
     <h3>Controle de salvamento</h3>
-    <button type="button" id="btn_save">Salvar</button>
     <button type="button" id="btn_delete_all">Apagar tudo</button>
 
     <ul id="list_saved_items"></ul>
     <hr />
-    <h3>Visualizar Tudo</h3>
-    <input
-      type="checkbox"
-      name="loadEverythingOnStartup"
-      id="load_everything_on_startup"
-    />
-    <label for="load_on_startup">Carregar tudo ao iniciar</label>
-    <p>! Carrega todas as listas ao iniciar</p>
-    <hr />
 
     <h3 id="nameList"></h3>
-    <section class="container"></section>
+    <section id="container"></section>
 
-    <script type="module" src="js/index.js"></script>
+    <script type="module" src="js/remaster/index.js"></script>
   </body>
 </html>
