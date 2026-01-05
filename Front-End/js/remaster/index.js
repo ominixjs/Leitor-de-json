@@ -1,5 +1,5 @@
 import { saveList } from "./localstorage.js";
-import { loadJSON, currentlist } from "./loadJSON.js";
+import { loadJSON } from "./loadJSON.js";
 
 // FAZER
 // Manutenção no carregamento no DOM
