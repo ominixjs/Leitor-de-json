@@ -1,23 +1,27 @@
-import { loadJSON, nameList } from "./loadJSON.js";
+import { createElements } from "./index.js";
+import { loadJSON, nameList, currentList } from "./loadJSON.js";
 
 loadListSave();
 
 // Carregamento automático de listas salvas
-function loadListSave() {
+async function loadListSave() {
+  // Carrega lista salvas no localstorage
   let ls = localStorage.getItem("listSave");
   ls = JSON.parse(ls);
 
+  // Verifica se há itens salvos
   if (ls == null) {
     console.log("Lista vázia");
     return;
   }
 
-  ls.forEach((item) => {
-    loadJSON(item.URL);
-  });
+  // Faz iterações com a lista
+  for (const item of ls) {
+    await loadJSON(item.URL);
+  }
 
-  console.log(1);
-  
+  // Cria lista no DOM
+  createElements(currentList);
 }
 
 // Salva dados para uso posterior
@@ -44,7 +48,9 @@ export function saveList() {
     URL,
   };
 
+  // Processo de salvamento
   if (ls == null) {
+    // Primeiro salvamento cria uma array
     let createFirstArray = [];
 
     createFirstArray.push(saved);
@@ -53,6 +59,7 @@ export function saveList() {
 
     console.log("Primeiro salvamento no banco de dados");
   } else {
+    // Após o primeiro salvamento adiciona o item a array existente
     let dataSave = JSON.parse(ls);
 
     dataSave.push(saved);
